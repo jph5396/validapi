@@ -23,21 +23,18 @@ func PropsFromType(t reflect.Type) PropertyGroup {
 		name := field.Name
 		switch field.Type {
 		case Int:
-			prop = NewProperty(name, Int)
+			prop = *NewProperty(name, Int)
 		case String:
-			prop = NewProperty(name, String)
+			prop = *NewProperty(name, String)
 		case Float:
-			prop = NewProperty(name, Float)
+			prop = *NewProperty(name, Float)
 		case Boolean:
-			prop = NewProperty(name, Boolean)
+			prop = *NewProperty(name, Boolean)
 		default:
 			panic(fmt.Errorf("type of %v not supported", field.Type.String()))
 		}
 
-		err := propGroup.AddProperties(prop)
-		if err != nil {
-			panic(err)
-		}
+		propGroup.AddProperties(prop)
 	}
 
 	return propGroup

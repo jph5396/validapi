@@ -22,8 +22,8 @@ type Property struct {
 }
 
 //NewProperty creates a property with a blank rule set.
-func NewProperty(name string, typ Type) Property {
-	return Property{
+func NewProperty(name string, typ Type) *Property {
+	return &Property{
 		Name:     name,
 		propType: typ,
 		rules:    []Rule{},
@@ -41,16 +41,16 @@ func (p Property) getType() Type {
 //AddRules will take the rules provided and add them to the Property,
 // checking if they are valid first. If not, it will print a msg stating
 // it has been ignored.
-func (p *Property) AddRules(rules ...Rule) error {
+func (p *Property) AddRules(rules ...Rule) *Property {
 	for _, r := range rules {
 		err := r.rulevalidation(p)
 		if err == nil {
 			p.rules = append(p.rules, r)
 		} else {
-			return fmt.Errorf("could not add rules to Property %v. error: %v", p.Name, err.Error())
+			panic(fmt.Errorf("could not add rules to Property %v. error: %v", p.Name, err.Error()))
 		}
 	}
-	return nil
+	return p
 }
 
 func (p Property) validate(key string, value interface{}) error {
@@ -87,15 +87,15 @@ func NewPropertyGroup() PropertyGroup {
 
 //AddProperties attempts to add properties to PropertyGroup. It will throw an error if any Properties have
 // conflicting names or aliases.
-func (pg *PropertyGroup) AddProperties(props ...Props) error {
+func (pg *PropertyGroup) AddProperties(props ...Props) *PropertyGroup {
 	for _, prop := range props {
 		if _, present := pg.properties[prop.getName()]; !present {
 			pg.properties[prop.getName()] = prop
 		} else {
-			return fmt.Errorf("duplicated Prop name: %v", prop.getName())
+			panic(fmt.Errorf("duplicated Prop name: %v", prop.getName()))
 		}
 	}
-	return nil
+	return pg
 }
 
 func (pg *PropertyGroup) validateGroup(body map[string]interface{}) error {

@@ -24,12 +24,13 @@ func TestRegexRule(t *testing.T) {
 	})
 
 	t.Run("Should fail to add to prop", func(t *testing.T) {
-		prop := NewProperty("test", Int)
-		rule, err := NewRegexRule(success)
-		err = prop.AddRules(rule)
-		if err == nil {
-			t.Error("wanted an error, got nil")
-		}
+		defer func() {
+			if r := recover(); r == nil {
+				t.Error("wanted an error, got nil")
+			}
+		}()
+		rule, _ := NewRegexRule(success)
+		_ = NewProperty("test", Int).AddRules(rule)
 	})
 
 	t.Run("Should pass validation", func(t *testing.T) {
@@ -76,11 +77,12 @@ func TestEnumRule(t *testing.T) {
 	enum, _ := NewEnumRule([]interface{}{1, 123}, Int)
 
 	t.Run("Should Apply to Prop", func(t *testing.T) {
-		prop := NewProperty("test", Int)
-		err := prop.AddRules(enum)
-		if err != nil {
-			t.Errorf("should pass but got %v instead", err.Error())
-		}
+		defer func() {
+			if r := recover(); r != nil {
+				t.Errorf("should pass but got %v instead", r)
+			}
+		}()
+		_ = NewProperty("test", Int).AddRules(enum)
 	})
 
 	t.Run("Should validate", func(t *testing.T) {
@@ -118,17 +120,24 @@ func TestCustomRule(t *testing.T) {
 	intRule.SetDescription("should be less than 10")
 
 	t.Run("Apply custom rule to prop", func(t *testing.T) {
-		err := prop.AddRules(intRule)
-		if err != nil {
-			t.Errorf("wanted nil got %v", err.Error())
-		}
+		defer func() {
+			if r := recover(); r != nil {
+				t.Errorf("wanted nil got %v", r)
+			}
+		}()
+		_ = prop.AddRules(intRule)
+
 	})
 
 	t.Run("Fail to apply rule", func(t *testing.T) {
-		err := prop.AddRules(stringRule)
-		if err == nil {
-			t.Errorf("wanted error got nil")
-		}
+		defer func() {
+			if r := recover(); r == nil {
+				t.Errorf("wanted error got nil")
+			}
+		}()
+
+		_ = prop.AddRules(stringRule)
+
 	})
 
 	t.Run("pass validation", func(t *testing.T) {

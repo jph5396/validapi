@@ -33,7 +33,7 @@ func TestProperty(t *testing.T) {
 	if err != nil {
 		t.Errorf("could not build rule for testing. err: %v", err.Error())
 	}
-	err = prop2.AddRules(rule)
+	prop2 = prop2.AddRules(rule)
 	if err != nil {
 		t.Errorf("could not place rule on prop. %v", err.Error())
 	}
