@@ -1,6 +1,7 @@
 package validapi
 
 import (
+	"errors"
 	"testing"
 )
 
@@ -33,16 +34,16 @@ func TestRegexRule(t *testing.T) {
 
 	t.Run("Should pass validation", func(t *testing.T) {
 		rule, _ := NewRegexRule(success)
-		pass, msg := rule.validate("ABC")
-		if !pass {
-			t.Errorf("should have passed, but got %v instead", msg)
+		err := rule.validate("ABC")
+		if err != nil {
+			t.Errorf("should have passed, but got %v instead", err.Error())
 		}
 	})
 
 	t.Run("Should fail validation", func(t *testing.T) {
 		rule, _ := NewRegexRule(success)
-		pass, _ := rule.validate("A12BC")
-		if pass {
+		err := rule.validate("A12BC")
+		if err == nil {
 			t.Error("should have failed, but passed instead")
 		}
 	})
@@ -83,15 +84,15 @@ func TestEnumRule(t *testing.T) {
 	})
 
 	t.Run("Should validate", func(t *testing.T) {
-		pass, msg := enum.validate(1)
-		if !pass {
-			t.Errorf("Should have passed but got %v", msg)
+		err := enum.validate(1)
+		if err != nil {
+			t.Errorf("Should have passed but got %v", err.Error())
 		}
 	})
 
 	t.Run("Should fail to validate", func(t *testing.T) {
-		pass, _ := enum.validate(43)
-		if pass {
+		err := enum.validate(43)
+		if err == nil {
 			t.Error("wanted error. got nil")
 		}
 	})
@@ -99,20 +100,20 @@ func TestEnumRule(t *testing.T) {
 
 func TestCustomRule(t *testing.T) {
 	prop := NewProperty("test", Int)
-	stringRule := NewCustomRule("StringRule", String, func(i interface{}) (bool, string) {
+	stringRule := NewCustomRule("StringRule", String, func(i interface{}) error {
 		val, ok := i.(string)
 		if val == "test" && ok {
-			return true, ""
+			return nil
 		}
-		return false, "rule could not be validated."
+		return errors.New("rule could not be validated")
 	})
 
-	intRule := NewCustomRule("IntRule", Int, func(i interface{}) (bool, string) {
+	intRule := NewCustomRule("IntRule", Int, func(i interface{}) error {
 		val, ok := i.(int)
 		if val < 10 && ok {
-			return true, ""
+			return nil
 		}
-		return false, "could not validate."
+		return errors.New("could not validate")
 	})
 	intRule.SetDescription("should be less than 10")
 
@@ -131,9 +132,9 @@ func TestCustomRule(t *testing.T) {
 	})
 
 	t.Run("pass validation", func(t *testing.T) {
-		pass, msg := intRule.validate(1)
-		if !pass {
-			t.Errorf("test failed int validation did not pass: %v", msg)
+		err := intRule.validate(1)
+		if err != nil {
+			t.Errorf("test failed int validation did not pass: %v", err.Error())
 		}
 	})
 }

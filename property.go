@@ -67,9 +67,9 @@ func (p Property) validate(key string, value interface{}) error {
 		return fmt.Errorf("%v: invalid type. got %v, want %v", key, valueType.String(), p.propType.String())
 	}
 	for _, rule := range p.rules {
-		ok, msg := rule.validate(value)
-		if !ok {
-			return fmt.Errorf("%v: %v", key, msg)
+		err := rule.validate(value)
+		if err != nil {
+			return fmt.Errorf("%v: %v", key, err.Error())
 		}
 	}
 	return nil

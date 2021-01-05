@@ -15,9 +15,10 @@ type Rule interface {
 	//validate the function used to define if an input is valid or not.
 	// if an input is not valid, the function should return false, and a string
 	// representing the eror message that should be sent as part of the response.
-	validate(interface{}) (bool, string)
+	validate(interface{}) error
 
-	//rulevalidation should check to be sure the rule can be applied to given property.
+	//rulevalidation receives the Property its being applied to should use it to check if
+	// it can be applied to the given property. It will be called when using the property.AddRules method.
 	rulevalidation(Props) error
 }
 
@@ -40,17 +41,17 @@ func NewRegexRule(str string) (RegexRule, error) {
 	}, nil
 }
 
-func (r RegexRule) validate(i interface{}) (bool, string) {
+func (r RegexRule) validate(i interface{}) error {
 
 	value := i.(string)
 	//Note: we ignore the error because it should have already been
 	// confirmed that the expression string compiles when it was created.
 	regex, _ := regexp.Compile(r.regexStr)
 	if regex.MatchString(value) {
-		return true, ""
+		return nil
 	}
-	msg := fmt.Sprintf("%v does not match regex pattern %v", value, r.regexStr)
-	return false, msg
+	return fmt.Errorf("%v does not match regex pattern %v", value, r.regexStr)
+
 }
 
 func (r RegexRule) rulevalidation(p Props) error {
@@ -88,15 +89,14 @@ func NewEnumRule(members []interface{}, t Type) (EnumRule, error) {
 	}, nil
 }
 
-func (r EnumRule) validate(i interface{}) (bool, string) {
+func (r EnumRule) validate(i interface{}) error {
 	if _, ok := r.enumvalues[i]; ok {
-		return true, ""
+		return nil
 	}
 
-	msg := fmt.Sprintf("%v not in enum list", i)
-	return false, msg
-}
+	return fmt.Errorf("%v not in enum list", i)
 
+}
 func (r EnumRule) rulevalidation(p Props) error {
 
 	if r.enumType != p.getType() {
@@ -112,18 +112,18 @@ type CustomRule struct {
 	name        string
 	description string
 	t           Type
-	validation  func(interface{}) (bool, string)
+	validation  func(interface{}) error
 }
 
 //NewCustomRule creates a new custom rule that can be applied to properties.
-func NewCustomRule(n string, typ Type, v func(interface{}) (bool, string)) CustomRule {
+func NewCustomRule(n string, typ Type, v func(interface{}) error) CustomRule {
 	return CustomRule{
 		name:       n,
 		t:          typ,
 		validation: v,
 	}
 }
-func (cr CustomRule) validate(i interface{}) (bool, string) {
+func (cr CustomRule) validate(i interface{}) error {
 	return cr.validation(i)
 }
 
