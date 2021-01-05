@@ -54,11 +54,7 @@ func TestComplextProperty(t *testing.T) {
 	prop1 := NewProperty("Name", String)
 	prop2 := NewProperty("ID", Int)
 	prop3 := NewProperty("score", Float)
-
-	propgroup := PropertyGroup{
-		properties: make(map[string]Props),
-	}
-	propgroup.AddProperties(prop1, prop2, prop3)
+	propgroup := NewPropertyGroup().AddProperties(prop1, prop2, prop3)
 	objProp := NewObjectProperty("User", false)
 	objProp.UsePropertyGroup(propgroup)
 
@@ -91,20 +87,14 @@ func TestNestedProperties(t *testing.T) {
 	prop1 := NewProperty("Name", String)
 	prop2 := NewProperty("ID", Int)
 	prop3 := NewProperty("score", Float)
-
-	propgroup := PropertyGroup{
-		properties: make(map[string]Props),
-	}
-	propgroup.AddProperties(prop1, prop2, prop3)
+	propgroup := NewPropertyGroup().AddProperties(prop1, prop2, prop3)
 	objProp := NewObjectProperty("User", false)
 	objProp.UsePropertyGroup(propgroup)
 
 	computer := NewProperty("computer", String)
 	status := NewProperty("status", String)
-	supergroup := PropertyGroup{
-		properties: make(map[string]Props),
-	}
-	supergroup.AddProperties(computer, status, objProp)
+
+	supergroup := NewPropertyGroup().AddProperties(computer, status, objProp)
 	superObjProp := NewObjectProperty("PCID", false)
 	superObjProp.UsePropertyGroup(supergroup)
 	var test = map[string]interface{}{
@@ -129,10 +119,7 @@ func TestArrayOfProperties(t *testing.T) {
 	prop2 := NewProperty("ID", Int)
 	prop3 := NewProperty("score", Float)
 
-	propgroup := PropertyGroup{
-		properties: make(map[string]Props),
-	}
-	propgroup.AddProperties(prop1, prop2, prop3)
+	propgroup := NewPropertyGroup().AddProperties(prop1, prop2, prop3)
 	objProp := NewObjectProperty("Users", true)
 	objProp.UsePropertyGroup(propgroup)
 

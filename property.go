@@ -81,8 +81,8 @@ type PropertyGroup struct {
 }
 
 //NewPropertyGroup creates a PropertyGroup with no properties.
-func NewPropertyGroup() PropertyGroup {
-	return PropertyGroup{properties: make(map[string]Props)}
+func NewPropertyGroup() *PropertyGroup {
+	return &PropertyGroup{properties: make(map[string]Props)}
 }
 
 //AddProperties attempts to add properties to PropertyGroup. It will throw an error if any Properties have
@@ -120,7 +120,7 @@ type ObjectProperty struct {
 	Name     string
 	propType Type
 	slice    bool
-	group    PropertyGroup
+	group    *PropertyGroup
 }
 
 func (o ObjectProperty) getName() string {
@@ -131,18 +131,28 @@ func (o ObjectProperty) getType() Type {
 	return o.propType
 }
 
-//NewObjectProperty creates a new Object Property with the name provided and sets the slice
-func NewObjectProperty(name string, slice bool) ObjectProperty {
-	return ObjectProperty{
+//NewObjectProperty creates a new Object Property with the name provided and sets the slice var
+func NewObjectProperty(name string, slice bool) *ObjectProperty {
+	return &ObjectProperty{
 		Name:     name,
 		slice:    slice,
 		propType: Group,
+		group:    NewPropertyGroup(),
 	}
 }
 
-//UsePropertyGroup sets the property group on the object.
-func (o *ObjectProperty) UsePropertyGroup(pg PropertyGroup) {
+//UsePropertyGroup sets the property group on the object. this replaces the entire propertygroup
+// that is already created when calling NewObjectProperty. the primary use case for it is when
+// reusing a propertygroup from another route.
+func (o *ObjectProperty) UsePropertyGroup(pg *PropertyGroup) *ObjectProperty {
 	o.group = pg
+	return o
+}
+
+//AddProperties add Base Properties to the property group of the object property.
+func (o *ObjectProperty) AddProperties(p ...Props) *ObjectProperty {
+	o.group.AddProperties(p...)
+	return o
 }
 
 func (o ObjectProperty) validate(key string, val interface{}) error {
